@@ -57,14 +57,22 @@ export function useInvestmentGroups() {
   const fetchGroups = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from('investment_groups')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
-      setGroups((data as any[]) || []);
+    try {
+      const { data, error } = await supabase
+        .from('investment_groups')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        // Better error messaging
+        const errorMsg = error.message.includes('investment_groups')
+          ? 'Investment groups feature is not yet set up. Please contact support.'
+          : error.message;
+        toast({ title: 'Error', description: errorMsg, variant: 'destructive' });
+      } else {
+        setGroups((data as any[]) || []);
+      }
+    } catch (err) {
+      toast({ title: 'Error', description: 'Failed to load investment groups', variant: 'destructive' });
     }
     setLoading(false);
   }, [user, toast]);
