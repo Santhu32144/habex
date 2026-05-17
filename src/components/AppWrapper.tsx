@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SplashScreen } from './SplashScreen';
 import { OnboardingFlow } from './OnboardingFlow';
-import { AllocateExpenseModal } from './AllocateExpenseModal';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUnallocatedExpenses } from '@/contexts/UnallocatedExpenseContext';
 
 interface AppWrapperProps {
   children: React.ReactNode;
@@ -14,13 +12,11 @@ const SPLASH_SHOWN_KEY = 'habex-splash-shown-session';
 
 export const AppWrapper: React.FC<AppWrapperProps> = ({ children }) => {
   const { user, isLoading: authLoading } = useAuth();
-  const { totalUnallocated } = useUnallocatedExpenses();
   const [showSplash, setShowSplash] = useState(() => {
     // Only show splash once per session
     return !sessionStorage.getItem(SPLASH_SHOWN_KEY);
   });
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showAllocationModal, setShowAllocationModal] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -58,13 +54,6 @@ export const AppWrapper: React.FC<AppWrapperProps> = ({ children }) => {
     }
   }, [user, authLoading, showSplash]);
 
-  // Show allocation modal when there's unallocated money
-  useEffect(() => {
-    if (isReady && user && totalUnallocated > 0 && !showAllocationModal) {
-      setShowAllocationModal(true);
-    }
-  }, [isReady, user, totalUnallocated, showAllocationModal]);
-
   // Show splash screen
   if (showSplash) {
     return <SplashScreen onComplete={handleSplashComplete} />;
@@ -83,7 +72,6 @@ export const AppWrapper: React.FC<AppWrapperProps> = ({ children }) => {
   return (
     <>
       {children}
-      <AllocateExpenseModal open={showAllocationModal} onOpenChange={setShowAllocationModal} />
     </>
   );
 };

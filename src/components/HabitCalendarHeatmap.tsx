@@ -575,7 +575,7 @@ const HabitCalendarHeatmap: React.FC<HabitCalendarHeatmapProps> = ({ habits }) =
 
       {/* Day Details Dialog */}
       <Dialog open={!!selectedDay} onOpenChange={() => setSelectedDay(null)}>
-        <DialogContent className="!w-[min(90vw,420px)] !max-w-none p-4 sm:p-6">
+        <DialogContent className="p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />

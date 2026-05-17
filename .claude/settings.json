@@ -4,7 +4,9 @@
       "Bash(supabase --version)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(tee dev-server.log)",
+      "Bash(timeout 30 tail -f \"C:\\\\Users\\\\ssssa\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\i--React-habex--github\\\\f9c71139-e3ad-43d4-aed5-6b84373b29f6\\\\tasks\\\\bvcmd8pu1.output\")"
     ]
   }
 }

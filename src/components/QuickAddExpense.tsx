@@ -2,16 +2,30 @@ import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { useUnallocatedExpenses } from '@/contexts/UnallocatedExpenseContext';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useExpenses } from '@/contexts/ExpenseContext';
 import { useToast } from '@/hooks/use-toast';
+import { CATEGORIES } from '@/data/expenseData';
 
 export const QuickAddExpense: React.FC = () => {
-  const { addUnallocatedExpense } = useUnallocatedExpenses();
+  const { updateMonth, selectedYear, selectedMonth, getYearData } = useExpenses();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('snacks');
+  const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Check if description is needed for selected category
+  const needsDescription = category === 'otherExpenses' || category === 'selfExpense';
 
   const handleAdd = async () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -23,16 +37,50 @@ export const QuickAddExpense: React.FC = () => {
       return;
     }
 
+    if (needsDescription && !description.trim()) {
+      toast({
+        title: 'Description Required',
+        description: 'Please enter a description for this expense',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await addUnallocatedExpense(parseFloat(amount));
+      const numAmount = parseFloat(amount);
+
+      // Get current month data
+      const now = new Date();
+      const month = now.toLocaleString('default', { month: 'long' });
+      const year = now.getFullYear();
+
+      // Get existing month data to merge with new expense
+      const yearData = getYearData(year);
+      const existingData = yearData[month] || {};
+
+      // Build the complete expense data by merging with existing
+      const updatedData = { ...existingData };
+
+      if (category === 'snacks' || category === 'food' || category === 'travellingCharge' || category === 'petrol') {
+        updatedData[category] = [...(updatedData[category] || []), numAmount];
+      } else if (category === 'otherExpenses' || category === 'selfExpense') {
+        updatedData[category] = [...(updatedData[category] || []), { desc: description || 'Quick Add', amount: numAmount }];
+      }
+
+      // Update the month data
+      await updateMonth(year, month, updatedData);
+
       toast({
         title: 'Success',
-        description: `Added ₹${amount}. You can allocate it later.`,
+        description: `Added ₹${amount} to ${month}`,
       });
       setAmount('');
+      setDescription('');
+      setCategory('snacks');
       setOpen(false);
     } catch (error) {
+      console.error('Error adding expense:', error);
       toast({
         title: 'Error',
         description: 'Failed to add expense',
@@ -56,16 +104,17 @@ export const QuickAddExpense: React.FC = () => {
 
       {/* Quick Add Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="!w-[min(90vw,420px)] !max-w-none p-4 sm:p-6">
+        <DialogContent className="p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>Quick Add Money</DialogTitle>
+            <DialogTitle>Quick Add Expense</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+            {/* Amount */}
             <div className="space-y-2">
-              <label htmlFor="amount" className="text-sm font-medium">
+              <Label htmlFor="amount" className="text-sm font-medium">
                 Amount (₹)
-              </label>
+              </Label>
               <Input
                 id="amount"
                 type="number"
@@ -75,10 +124,42 @@ export const QuickAddExpense: React.FC = () => {
                 className="text-base"
                 autoFocus
               />
-              <p className="text-xs text-muted-foreground">
-                You'll allocate this to categories next
-              </p>
             </div>
+
+            {/* Category */}
+            <div className="space-y-2">
+              <Label htmlFor="category" className="text-sm font-medium">
+                Category
+              </Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="text-base">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(CATEGORIES).map(([key, cat]) => (
+                    <SelectItem key={key} value={key}>
+                      {cat.icon} {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Description - only shown for otherExpenses and selfExpense */}
+            {needsDescription && (
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-sm font-medium">
+                  Description *
+                </Label>
+                <Input
+                  id="description"
+                  placeholder="e.g., Zomato, Coffee, Shopping"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="text-base"
+                />
+              </div>
+            )}
           </div>
 
           <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
@@ -93,9 +174,9 @@ export const QuickAddExpense: React.FC = () => {
             <Button
               onClick={handleAdd}
               className="w-full sm:w-auto"
-              disabled={isLoading || !amount}
+              disabled={isLoading || !amount || (needsDescription && !description.trim())}
             >
-              {isLoading ? 'Adding...' : 'Add Amount'}
+              {isLoading ? 'Adding...' : 'Add Expense'}
             </Button>
           </DialogFooter>
         </DialogContent>

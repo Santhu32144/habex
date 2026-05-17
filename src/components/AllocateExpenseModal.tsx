@@ -37,6 +37,13 @@ export const AllocateExpenseModal: React.FC<AllocateExpenseModalProps> = ({ open
   const [allocations, setAllocations] = useState<Allocation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleClose = () => {
+    if (!isLoading) {
+      setAllocations([]);
+      onOpenChange(false);
+    }
+  };
+
   const totalAllocated = allocations.reduce((sum, a) => sum + a.amount, 0);
   const remaining = totalUnallocated - totalAllocated;
 
@@ -140,8 +147,18 @@ export const AllocateExpenseModal: React.FC<AllocateExpenseModalProps> = ({ open
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!w-[min(90vw,500px)] !max-w-none p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        handleClose();
+      }
+    }}>
+      <DialogContent
+        className="max-w-[min(90vw,500px)] p-4 sm:p-6 max-h-[90vh] overflow-y-auto"
+        onPointerDownOutside={(e) => {
+          e.preventDefault();
+          handleClose();
+        }}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             💰 Allocate Money
@@ -293,7 +310,7 @@ export const AllocateExpenseModal: React.FC<AllocateExpenseModalProps> = ({ open
         <div className="flex gap-2 pt-4">
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={handleClose}
             className="flex-1"
             disabled={isLoading}
           >
