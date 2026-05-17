@@ -6,6 +6,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const ADMIN_EMAILS = ['ssssanthu32144@gmail.com'];
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -37,14 +39,20 @@ Deno.serve(async (req) => {
     }
 
     const userId = claimsData.claims.sub;
+    const userEmail = claimsData.claims.email;
 
-    // 2. Check admin role using the has_role function
-    const { data: isAdmin, error: roleError } = await anonClient.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
+    // 2. Check admin role (email-based or database)
+    let isAdmin = ADMIN_EMAILS.includes(userEmail);
 
-    if (roleError || !isAdmin) {
+    if (!isAdmin) {
+      const { data: roleCheck, error: roleError } = await anonClient.rpc("has_role", {
+        _user_id: userId,
+        _role: "admin",
+      });
+      isAdmin = roleCheck === true;
+    }
+
+    if (!isAdmin) {
       return new Response(JSON.stringify({ error: "Forbidden: admin access required" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

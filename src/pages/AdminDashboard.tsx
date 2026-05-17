@@ -284,11 +284,12 @@ const AdminDashboard: React.FC = () => {
     setActivityLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('admin-activity');
+      console.log('Activity response:', { data, error });
       if (error) throw error;
       setActivities(data?.activities ?? []);
     } catch (err: any) {
       console.error('Failed to fetch activity:', err);
-      toast.error('Failed to load activity log');
+      toast.error(`Failed to load activity log: ${err.message}`);
     }
     setActivityLoading(false);
   }, []);
