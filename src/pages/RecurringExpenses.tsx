@@ -405,16 +405,16 @@ const RecurringExpenses: React.FC = () => {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md top-[35%]">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="!w-[min(92vw,440px)] !max-w-none p-4 sm:p-6 !max-h-[calc(100vh-3rem)] !top-[50%] !-translate-y-1/2 overflow-y-auto gap-3 sm:gap-4">
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="text-lg sm:text-xl font-semibold">
               {editingExpense ? 'Edit Recurring Expense' : 'Add Recurring Expense'}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Icon Selection */}
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Icon</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label className="text-xs sm:text-sm font-medium text-muted-foreground">Icon</Label>
               <div className="flex flex-wrap gap-2">
                 {EXPENSE_ICONS.map(({ icon, label }) => (
                   <button
@@ -422,9 +422,9 @@ const RecurringExpenses: React.FC = () => {
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, icon }))}
                     className={cn(
-                      'p-2 rounded-lg text-xl transition-all',
+                      'p-2 rounded-lg text-xl transition-all hover:scale-110',
                       formData.icon === icon
-                        ? 'bg-primary/20 ring-2 ring-primary'
+                        ? 'bg-primary/20 ring-2 ring-primary scale-110'
                         : 'bg-muted hover:bg-muted/80'
                     )}
                     title={label}
@@ -436,8 +436,8 @@ const RecurringExpenses: React.FC = () => {
             </div>
 
             {/* Name */}
-            <div>
-              <Label htmlFor="name">Name *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="name" className="text-xs sm:text-sm font-medium">Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -447,20 +447,21 @@ const RecurringExpenses: React.FC = () => {
             </div>
 
             {/* Amount */}
-            <div>
-              <Label htmlFor="amount">Amount (₹) *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-xs sm:text-sm font-medium">Amount (₹) *</Label>
               <Input
                 id="amount"
                 type="number"
                 value={formData.amount}
                 onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
                 placeholder="0"
+                className="text-base"
               />
             </div>
 
             {/* Frequency */}
-            <div>
-              <Label>Frequency</Label>
+            <div className="space-y-2">
+              <Label className="text-xs sm:text-sm font-medium">Frequency</Label>
               <Select
                 value={formData.frequency}
                 onValueChange={(value: RecurrenceFrequency) =>
@@ -481,15 +482,15 @@ const RecurringExpenses: React.FC = () => {
             </div>
 
             {/* Category */}
-            <div>
-              <Label>Category</Label>
+            <div className="space-y-2">
+              <Label className="text-xs sm:text-sm font-medium">Category</Label>
               <Select
                 value={formData.category}
                 onValueChange={(value: 'otherExpenses' | 'selfExpense') =>
                   setFormData(prev => ({ ...prev, category: value }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -500,32 +501,34 @@ const RecurringExpenses: React.FC = () => {
             </div>
 
             {/* Start Date */}
-            <div>
-              <Label htmlFor="startDate">Start Date</Label>
+            <div className="space-y-2">
+              <Label htmlFor="startDate" className="text-xs sm:text-sm font-medium">Start Date</Label>
               <Input
                 id="startDate"
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                className="text-base"
               />
             </div>
 
             {/* Notes */}
-            <div>
-              <Label htmlFor="notes">Notes (optional)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="notes" className="text-xs sm:text-sm font-medium">Notes (optional)</Label>
               <Input
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                 placeholder="Any additional notes..."
+                className="text-base"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog}>
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
+            <Button variant="outline" onClick={handleCloseDialog} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>
+            <Button onClick={handleSubmit} className="w-full sm:w-auto">
               {editingExpense ? 'Update' : 'Add'}
             </Button>
           </DialogFooter>

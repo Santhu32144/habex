@@ -585,30 +585,30 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <main className="flex-1 min-w-0">
         {/* Top Bar */}
         <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-sm">
-          <div className="flex items-center justify-between px-4 lg:px-8 h-16">
+          <div className="flex items-center justify-between px-3 sm:px-4 lg:px-8 h-16">
             {/* Left: Menu + Logo + Title */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden hover:bg-primary/10"
+                className="lg:hidden hover:bg-primary/10 h-9 w-9"
                 onClick={() => setSidebarOpen(true)}
               >
                 <Menu className="w-5 h-5" />
               </Button>
-              <div className="flex items-center gap-3">
-                <motion.img 
-                  src="/habex-logo.png" 
-                  alt="Habex" 
-                  className="w-8 h-8 rounded-lg lg:hidden cursor-pointer"
-                  whileHover={{ 
-                    scale: 1.1, 
+              <div className="flex items-center gap-2 sm:gap-3">
+                <motion.img
+                  src="/habex-logo.png"
+                  alt="Habex"
+                  className="w-9 h-9 sm:w-8 sm:h-8 rounded-lg lg:hidden cursor-pointer flex-shrink-0"
+                  whileHover={{
+                    scale: 1.1,
                     rotate: [0, -5, 5, 0],
                     transition: { duration: 0.4 }
                   }}
                   whileTap={{ scale: 0.95 }}
                 />
-                <h1 className="font-display font-bold text-xl text-primary lg:hidden">Habex</h1>
+                <h1 className="font-display font-bold text-base sm:text-xl text-primary lg:hidden whitespace-nowrap">Habex</h1>
                 <div className="hidden lg:flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   <h2 className="font-display font-semibold text-lg tracking-tight">
@@ -619,7 +619,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             {/* Right: Search Icon + Actions */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-3">
               {/* Search icon for expense-related pages */}
               {(location.pathname === '/expenses' || 
                 location.pathname === '/months' || 
