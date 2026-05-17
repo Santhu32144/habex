@@ -50,7 +50,7 @@ function App() {
                     <HabitProvider>
                       <Toaster />
                       <Sonner />
-                  <Routes>
+                      <Routes>
                     {/* Auth route */}
                     <Route path="/auth" element={<Auth />} />
                     
@@ -157,7 +157,7 @@ function App() {
                     } />
                     
                     <Route path="*" element={<NotFound />} />
-                  </Routes>
+                      </Routes>
                     </HabitProvider>
                   </UnallocatedExpenseProvider>
                 </RecurringExpenseProvider>
