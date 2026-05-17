@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ExpenseProvider } from "@/contexts/ExpenseContext";
 import { HabitProvider } from "@/contexts/HabitContext";
 import { RecurringExpenseProvider } from "@/contexts/RecurringExpenseContext";
+import { UnallocatedExpenseProvider } from "@/contexts/UnallocatedExpenseContext";
 import { Layout } from "@/components/Layout";
 import { AppWrapper } from "@/components/AppWrapper";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -45,9 +46,10 @@ function App() {
             <AppWrapper>
               <ExpenseProvider>
                 <RecurringExpenseProvider>
-                  <HabitProvider>
-                    <Toaster />
-                    <Sonner />
+                  <UnallocatedExpenseProvider>
+                    <HabitProvider>
+                      <Toaster />
+                      <Sonner />
                   <Routes>
                     {/* Auth route */}
                     <Route path="/auth" element={<Auth />} />
@@ -156,7 +158,8 @@ function App() {
                     
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                  </HabitProvider>
+                    </HabitProvider>
+                  </UnallocatedExpenseProvider>
                 </RecurringExpenseProvider>
               </ExpenseProvider>
             </AppWrapper>

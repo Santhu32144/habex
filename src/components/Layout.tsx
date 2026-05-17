@@ -41,6 +41,7 @@ import { BottomTabBar } from '@/components/BottomTabBar';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
 import { NotificationPrompt } from '@/components/NotificationPrompt';
 import { ThemeQuickSwitch } from '@/components/ThemeQuickSwitch';
+import { QuickAddExpense } from '@/components/QuickAddExpense';
 import { useSwipe } from '@/hooks/useSwipe';
 import {
   Collapsible,
@@ -651,6 +652,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <BottomTabBar />
         <NotificationPrompt />
       </main>
+
+      {/* Quick Add Expense Floating Button */}
+      <QuickAddExpense />
     </div>
   );
 };
