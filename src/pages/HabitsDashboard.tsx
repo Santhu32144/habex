@@ -401,12 +401,12 @@ const HabitsCalendarGrid: React.FC<HabitsCalendarGridProps> = ({
                             >
                               <button
                                 onClick={() => toggleHabitCompletion(habit.id, dateStr)}
-                                className="mx-auto flex items-center justify-center h-6 w-6 rounded-full transition-all hover:scale-110"
+                                className="mx-auto flex items-center justify-center h-10 w-10 rounded-full transition-all hover:scale-110 active:scale-95"
                               >
                                 {isCompleted ? (
-                                  <CheckCircle2 className="h-5 w-5" style={{ color: habit.color }} />
+                                  <CheckCircle2 className="h-6 w-6" style={{ color: habit.color }} />
                                 ) : (
-                                  <Circle className="h-5 w-5 text-muted-foreground/30 hover:text-muted-foreground/50" />
+                                  <Circle className="h-6 w-6 text-muted-foreground/30 hover:text-muted-foreground/50" />
                                 )}
                               </button>
                             </td>

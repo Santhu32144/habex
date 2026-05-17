@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(supabase --version)"
+      "Bash(supabase --version)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
