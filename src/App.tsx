@@ -43,10 +43,10 @@ function App() {
         <TooltipProvider>
         <BrowserRouter>
           <AuthProvider>
-            <AppWrapper>
-              <ExpenseProvider>
-                <RecurringExpenseProvider>
-                  <UnallocatedExpenseProvider>
+            <UnallocatedExpenseProvider>
+              <AppWrapper>
+                <ExpenseProvider>
+                  <RecurringExpenseProvider>
                     <HabitProvider>
                       <Toaster />
                       <Sonner />
@@ -159,10 +159,10 @@ function App() {
                     <Route path="*" element={<NotFound />} />
                       </Routes>
                     </HabitProvider>
-                  </UnallocatedExpenseProvider>
-                </RecurringExpenseProvider>
-              </ExpenseProvider>
-            </AppWrapper>
+                  </RecurringExpenseProvider>
+                </ExpenseProvider>
+              </AppWrapper>
+            </UnallocatedExpenseProvider>
           </AuthProvider>
         </BrowserRouter>
         </TooltipProvider>
