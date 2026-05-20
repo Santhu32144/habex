@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Plus, 
-  Pin, 
-  Trash2, 
-  X, 
+import {
+  Plus,
+  Pin,
+  Trash2,
+  X,
   Palette,
   Search,
   BookOpen,
   Tag,
-  Hash
+  Hash,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { createClient } from '@supabase/supabase-js';
 
 interface Note {
   id: string;
@@ -52,29 +55,21 @@ const NOTE_COLORS = [
 ];
 
 const STORAGE_KEY = 'notebook-notes';
-
 const LABELS_STORAGE_KEY = 'notebook-labels';
 
-const Notebook: React.FC = () => {
-  const [notes, setNotes] = useState<Note[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return parsed.map((n: any) => ({
-        ...n,
-        labels: n.labels || [],
-        createdAt: new Date(n.createdAt),
-        updatedAt: new Date(n.updatedAt),
-      }));
-    }
-    return [];
-  });
+// Initialize Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
+const Notebook: React.FC = () => {
+  const { user } = useAuth();
+  const [notes, setNotes] = useState<Note[]>([]);
   const [customLabels, setCustomLabels] = useState<string[]>(() => {
     const saved = localStorage.getItem(LABELS_STORAGE_KEY);
     return saved ? JSON.parse(saved) : [];
   });
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLabelFilter, setSelectedLabelFilter] = useState<string | null>(null);
   const [isAddingNote, setIsAddingNote] = useState(false);
@@ -83,13 +78,53 @@ const Notebook: React.FC = () => {
   const [showColorPicker, setShowColorPicker] = useState<string | null>(null);
   const [newLabelInput, setNewLabelInput] = useState('');
   const [showLabelInput, setShowLabelInput] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const allLabels = [...DEFAULT_LABELS, ...customLabels];
 
-  // Save notes to localStorage
+  // Fetch notes from Supabase on mount
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-  }, [notes]);
+    if (user?.id) {
+      loadNotesFromDatabase();
+    }
+  }, [user?.id]);
+
+  const loadNotesFromDatabase = async () => {
+    if (!user?.id) return;
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading notes:', error);
+        toast.error('Failed to load notes');
+        return;
+      }
+
+      if (data) {
+        const formattedNotes = data.map((n: any) => ({
+          id: n.id,
+          title: n.title,
+          content: n.content,
+          color: n.color || 'bg-card',
+          pinned: n.pinned || false,
+          labels: n.labels || [],
+          createdAt: new Date(n.created_at),
+          updatedAt: new Date(n.updated_at),
+        }));
+        setNotes(formattedNotes);
+      }
+    } catch (error) {
+      console.error('Error loading notes:', error);
+      toast.error('Failed to load notes');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Save custom labels to localStorage
   useEffect(() => {
@@ -125,56 +160,184 @@ const Notebook: React.FC = () => {
     }));
   };
 
-  const addNote = () => {
+  const addNote = async () => {
     if (!newNote.title.trim() && !newNote.content.trim()) {
       setIsAddingNote(false);
       return;
     }
 
-    const note: Note = {
-      id: Date.now().toString(),
-      title: newNote.title.trim(),
-      content: newNote.content.trim(),
-      color: newNote.color,
-      pinned: false,
-      labels: newNote.labels,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    if (!user?.id) {
+      toast.error('Please log in first');
+      return;
+    }
 
-    setNotes(prev => [note, ...prev]);
-    setNewNote({ title: '', content: '', color: 'bg-card', labels: [] });
-    setIsAddingNote(false);
-    toast.success('Note added');
+    try {
+      const noteId = Date.now().toString();
+      const { error } = await supabase.from('notes').insert({
+        id: noteId,
+        user_id: user.id,
+        title: newNote.title.trim(),
+        content: newNote.content.trim(),
+        color: newNote.color,
+        pinned: false,
+        labels: newNote.labels,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        console.error('Error adding note:', error);
+        toast.error('Failed to add note');
+        return;
+      }
+
+      const note: Note = {
+        id: noteId,
+        title: newNote.title.trim(),
+        content: newNote.content.trim(),
+        color: newNote.color,
+        pinned: false,
+        labels: newNote.labels,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      setNotes(prev => [note, ...prev]);
+      setNewNote({ title: '', content: '', color: 'bg-card', labels: [] });
+      setIsAddingNote(false);
+      toast.success('Note added');
+    } catch (error) {
+      console.error('Error adding note:', error);
+      toast.error('Failed to add note');
+    }
   };
 
-  const updateNote = (updatedNote: Note) => {
-    setNotes(prev => prev.map(n => 
-      n.id === updatedNote.id 
-        ? { ...updatedNote, updatedAt: new Date() }
-        : n
-    ));
-    setEditingNote(null);
-    toast.success('Note updated');
+  const updateNote = async (updatedNote: Note) => {
+    if (!user?.id) {
+      toast.error('Please log in first');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('notes')
+        .update({
+          title: updatedNote.title,
+          content: updatedNote.content,
+          color: updatedNote.color,
+          labels: updatedNote.labels,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', updatedNote.id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error updating note:', error);
+        toast.error('Failed to update note');
+        return;
+      }
+
+      setNotes(prev => prev.map(n =>
+        n.id === updatedNote.id
+          ? { ...updatedNote, updatedAt: new Date() }
+          : n
+      ));
+      setEditingNote(null);
+      toast.success('Note updated');
+    } catch (error) {
+      console.error('Error updating note:', error);
+      toast.error('Failed to update note');
+    }
   };
 
-  const deleteNote = (id: string) => {
-    setNotes(prev => prev.filter(n => n.id !== id));
-    setEditingNote(null);
-    toast.success('Note deleted');
+  const deleteNote = async (id: string) => {
+    if (!user?.id) {
+      toast.error('Please log in first');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('notes')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error deleting note:', error);
+        toast.error('Failed to delete note');
+        return;
+      }
+
+      setNotes(prev => prev.filter(n => n.id !== id));
+      setEditingNote(null);
+      toast.success('Note deleted');
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      toast.error('Failed to delete note');
+    }
   };
 
-  const togglePin = (id: string) => {
-    setNotes(prev => prev.map(n => 
-      n.id === id ? { ...n, pinned: !n.pinned } : n
-    ));
+  const togglePin = async (id: string) => {
+    if (!user?.id) {
+      toast.error('Please log in first');
+      return;
+    }
+
+    try {
+      const note = notes.find(n => n.id === id);
+      if (!note) return;
+
+      const { error } = await supabase
+        .from('notes')
+        .update({
+          pinned: !note.pinned,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error toggling pin:', error);
+        return;
+      }
+
+      setNotes(prev => prev.map(n =>
+        n.id === id ? { ...n, pinned: !n.pinned } : n
+      ));
+    } catch (error) {
+      console.error('Error toggling pin:', error);
+    }
   };
 
-  const changeColor = (id: string, color: string) => {
-    setNotes(prev => prev.map(n => 
-      n.id === id ? { ...n, color } : n
-    ));
-    setShowColorPicker(null);
+  const changeColor = async (id: string, color: string) => {
+    if (!user?.id) {
+      toast.error('Please log in first');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('notes')
+        .update({
+          color,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error changing color:', error);
+        return;
+      }
+
+      setNotes(prev => prev.map(n =>
+        n.id === id ? { ...n, color } : n
+      ));
+      setShowColorPicker(null);
+    } catch (error) {
+      console.error('Error changing color:', error);
+    }
   };
 
   // Filter and sort notes
@@ -198,6 +361,17 @@ const Notebook: React.FC = () => {
     return NOTE_COLORS.find(c => c.value === colorValue)?.border || 'border-border';
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-2">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Loading your notes...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 w-full max-w-6xl mx-auto">
       {/* Header */}
@@ -208,7 +382,7 @@ const Notebook: React.FC = () => {
             Notebook
           </h1>
           <p className="text-muted-foreground">
-            Your personal notes and ideas
+            Your personal notes and ideas • Synced across devices
           </p>
         </div>
         

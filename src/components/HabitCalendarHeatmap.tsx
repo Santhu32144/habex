@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, TrendingDown, Minus, CalendarDays, ArrowUp, ArrowDown, X, CheckCircle2, XCircle, Calendar, Flame, Filter } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, CalendarDays, ArrowUp, ArrowDown, X, CheckCircle2, XCircle, Calendar, Flame, Filter, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { useHabits } from '@/contexts/HabitContext';
 import HeatmapExportShare from './HeatmapExportShare';
 
 interface Habit {
@@ -24,15 +25,33 @@ interface HabitCalendarHeatmapProps {
 }
 
 const HabitCalendarHeatmap: React.FC<HabitCalendarHeatmapProps> = ({ habits }) => {
+  const { updateHabit } = useHabits();
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
   const currentDay = now.getDate();
-  
+
   const [selectedDay, setSelectedDay] = useState<{ date: number; dateStr: string; completed: number; rate: number } | null>(null);
   const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const heatmapRef = useRef<HTMLDivElement>(null);
+
+  const handleToggleHabitCompletion = async (habit: Habit, dateStr: string) => {
+    setIsUpdating(habit.id);
+    try {
+      const isCompleted = habit.completedDates.includes(dateStr);
+      const updatedDates = isCompleted
+        ? habit.completedDates.filter(d => d !== dateStr)
+        : [...habit.completedDates, dateStr];
+
+      await updateHabit(habit.id, { completedDates: updatedDates });
+    } catch (error) {
+      console.error('Error updating habit:', error);
+    } finally {
+      setIsUpdating(null);
+    }
+  };
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const shortMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -611,14 +630,20 @@ const HabitCalendarHeatmap: React.FC<HabitCalendarHeatmapProps> = ({ habits }) =
                   </h4>
                   <div className="space-y-1">
                     {selectedDayHabits.completed.map(habit => (
-                      <div 
+                      <button
                         key={habit.id}
-                        className="flex items-center gap-3 p-2 rounded-lg bg-green-500/10 border border-green-500/20"
+                        onClick={() => selectedDay && handleToggleHabitCompletion(habit, selectedDay.dateStr)}
+                        disabled={isUpdating === habit.id}
+                        className="w-full flex items-center gap-3 p-2 rounded-lg bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 transition-colors disabled:opacity-50 text-left"
                       >
                         <span className="text-lg">{habit.icon}</span>
-                        <span className="text-sm font-medium">{habit.name}</span>
-                        <CheckCircle2 className="h-4 w-4 text-green-500 ml-auto" />
-                      </div>
+                        <span className="text-sm font-medium flex-1">{habit.name}</span>
+                        {isUpdating === habit.id ? (
+                          <Loader2 className="h-4 w-4 text-green-500 animate-spin" />
+                        ) : (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        )}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -633,14 +658,20 @@ const HabitCalendarHeatmap: React.FC<HabitCalendarHeatmapProps> = ({ habits }) =
                   </h4>
                   <div className="space-y-1">
                     {selectedDayHabits.incomplete.map(habit => (
-                      <div 
+                      <button
                         key={habit.id}
-                        className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 border border-muted"
+                        onClick={() => selectedDay && handleToggleHabitCompletion(habit, selectedDay.dateStr)}
+                        disabled={isUpdating === habit.id}
+                        className="w-full flex items-center gap-3 p-2 rounded-lg bg-muted/50 border border-muted hover:bg-muted/70 hover:border-primary/30 transition-colors disabled:opacity-50 text-left"
                       >
                         <span className="text-lg opacity-50">{habit.icon}</span>
-                        <span className="text-sm text-muted-foreground">{habit.name}</span>
-                        <XCircle className="h-4 w-4 text-muted-foreground/50 ml-auto" />
-                      </div>
+                        <span className="text-sm text-muted-foreground flex-1">{habit.name}</span>
+                        {isUpdating === habit.id ? (
+                          <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-muted-foreground/50" />
+                        )}
+                      </button>
                     ))}
                   </div>
                 </div>

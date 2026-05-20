@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import dashboardHeroVideo from '@/assets/dashboard-hero-video.mp4.asset.json';
 import MotivationalQuote from '@/components/MotivationalQuote';
 import CurrencyConverter from '@/components/CurrencyConverter';
-import { Wallet, Target, TrendingUp, Fuel, DollarSign, Flame, CheckCircle2, Calendar, BarChart3, Crown, CalendarDays } from 'lucide-react';
+import { Wallet, Target, TrendingUp, Fuel, DollarSign, Flame, CheckCircle2, Calendar, BarChart3, Crown, CalendarDays, Bell, Loader2 } from 'lucide-react';
+import { requestNotificationPermission, sendNotification } from '@/utils/notifications';
 import { useExpenses } from '@/contexts/ExpenseContext';
 import { useHabits } from '@/contexts/HabitContext';
 import { calculateYearTotals } from '@/data/expenseData';
@@ -15,6 +16,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import StreakLeaderboard from '@/components/StreakLeaderboard';
 import HabitBadges from '@/components/HabitBadges';
 import HabitCalendarHeatmap from '@/components/HabitCalendarHeatmap';
+import { DashboardHabitTracker } from '@/components/DashboardHabitTracker';
 import { 
   Heart, Dumbbell, Brain, Coffee, Book, Music, Bike, Moon, Sun, Droplets,
   Utensils, Pill, Cigarette, Wine, Timer, Pencil, Code, Gamepad2, Camera, Palette,
@@ -27,9 +29,33 @@ const CombinedDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { getFilteredYearData, selectedYear } = useExpenses();
   const { habits, getCompletionRate } = useHabits();
-  
+  const [isTestingNotification, setIsTestingNotification] = useState(false);
+
   const yearData = getFilteredYearData();
   const totals = calculateYearTotals(yearData);
+
+  const handleTestNotification = async () => {
+    setIsTestingNotification(true);
+    try {
+      const hasPermission = await requestNotificationPermission();
+      if (hasPermission) {
+        sendNotification({
+          title: '🎉 Test Notification',
+          body: 'This is a test notification from HabeX! Your device is ready to receive updates.',
+          icon: '/habex-icon-512.png',
+        });
+      } else {
+        // If permission was denied, show a prompt
+        const result = window.confirm(
+          'Notifications are disabled. Would you like to enable them? You can do this in your browser settings.'
+        );
+      }
+    } catch (error) {
+      console.error('Error sending notification:', error);
+    } finally {
+      setIsTestingNotification(false);
+    }
+  };
   
   // Get today's date string
   const today = new Date().toISOString().split('T')[0];
@@ -251,9 +277,33 @@ const CombinedDashboard: React.FC = () => {
           >
             Your combined view of expenses and habits. Stay on top of your finances and build better habits.
           </motion.p>
-          <MotivationalQuote />
+          <div className="flex items-center gap-4 mt-4">
+            <MotivationalQuote />
+            <Button
+              onClick={handleTestNotification}
+              disabled={isTestingNotification}
+              variant="outline"
+              size="sm"
+              className="gap-2 whitespace-nowrap"
+            >
+              {isTestingNotification ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                <>
+                  <Bell className="h-4 w-4" />
+                  Test Notification
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </motion.div>
+
+      {/* Quick Habit Tracker */}
+      <DashboardHabitTracker />
 
       {/* Two-column layout for Expenses and Habits */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

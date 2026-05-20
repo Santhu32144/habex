@@ -174,8 +174,10 @@ const AddEditExpense: React.FC = () => {
     category: 'snacks' | 'food' | 'travellingCharge' | 'petrol',
     label: string,
     icon: string
-  ) => (
-    <motion.div
+  ) => {
+    const total = formData[category].reduce((sum, value) => sum + (value || 0), 0);
+    return (
+      <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="stat-card"
@@ -183,7 +185,10 @@ const AddEditExpense: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-xl">{icon}</span>
-          <h3 className="font-display font-semibold">{label}</h3>
+          <div className="flex items-baseline gap-2">
+            <h3 className="font-display font-semibold">{label}</h3>
+            {total > 0 && <span className="text-sm text-muted-foreground">₹{total.toFixed(0)}</span>}
+          </div>
         </div>
         <Button
           type="button"
@@ -221,15 +226,18 @@ const AddEditExpense: React.FC = () => {
           </div>
         ))}
       </div>
-    </motion.div>
-  );
+      </motion.div>
+    );
+  };
 
   const renderDetailedCategory = (
     category: 'otherExpenses' | 'selfExpense',
     label: string,
     icon: string
-  ) => (
-    <motion.div
+  ) => {
+    const total = formData[category].reduce((sum, item) => sum + (item.amount || 0), 0);
+    return (
+      <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="stat-card"
@@ -237,7 +245,10 @@ const AddEditExpense: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-xl">{icon}</span>
-          <h3 className="font-display font-semibold">{label}</h3>
+          <div className="flex items-baseline gap-2">
+            <h3 className="font-display font-semibold">{label}</h3>
+            {total > 0 && <span className="text-sm text-muted-foreground">₹{total.toFixed(0)}</span>}
+          </div>
         </div>
         <Button
           type="button"
@@ -281,8 +292,9 @@ const AddEditExpense: React.FC = () => {
           </div>
         ))}
       </div>
-    </motion.div>
-  );
+      </motion.div>
+    );
+  };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
