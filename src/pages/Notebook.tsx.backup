@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
@@ -10,12 +10,7 @@ import {
   BookOpen,
   Tag,
   Hash,
-  Loader2,
-  CheckSquare,
-  List,
-  Heading2,
-  Bold,
-  Italic
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -84,7 +79,6 @@ const Notebook: React.FC = () => {
   const [newLabelInput, setNewLabelInput] = useState('');
   const [showLabelInput, setShowLabelInput] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const allLabels = [...DEFAULT_LABELS, ...customLabels];
 
@@ -157,79 +151,13 @@ const Notebook: React.FC = () => {
         const hasLabel = n.labels.includes(label);
         return {
           ...n,
-          labels: hasLabel
+          labels: hasLabel 
             ? n.labels.filter(l => l !== label)
             : [...n.labels, label]
         };
       }
       return n;
     }));
-  };
-
-  const insertFormatting = (prefix: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const before = newNote.content.substring(0, start);
-    const after = newNote.content.substring(end);
-
-    const newContent = before + prefix + after;
-    setNewNote(prev => ({ ...prev, content: newContent }));
-
-    setTimeout(() => {
-      textarea.focus();
-      const newCursorPos = start + prefix.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
-  };
-
-  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const textarea = textareaRef.current;
-      if (!textarea) return;
-
-      const cursorPos = textarea.selectionStart;
-      const text = newNote.content;
-
-      // Find the start of the current line
-      let lineStart = cursorPos;
-      while (lineStart > 0 && text[lineStart - 1] !== '\n') {
-        lineStart--;
-      }
-
-      // Get the current line
-      let lineEnd = cursorPos;
-      while (lineEnd < text.length && text[lineEnd] !== '\n') {
-        lineEnd++;
-      }
-      const currentLine = text.substring(lineStart, cursorPos);
-
-      // Detect format at the start of the line
-      let formatPrefix = '';
-      if (currentLine.match(/^- /)) {
-        formatPrefix = '- ';
-      } else if (currentLine.match(/^☐ /)) {
-        formatPrefix = '☐ ';
-      } else if (currentLine.match(/^#{1,6} /)) {
-        formatPrefix = currentLine.match(/^(#{1,6} )/)?.[1] || '';
-      }
-
-      // Insert new line with format
-      const before = text.substring(0, cursorPos);
-      const after = text.substring(cursorPos);
-      const newContent = before + '\n' + formatPrefix + after;
-
-      setNewNote(prev => ({ ...prev, content: newContent }));
-
-      setTimeout(() => {
-        textarea.focus();
-        const newCursorPos = cursorPos + 1 + formatPrefix.length;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-      }, 0);
-    }
   };
 
   const addNote = async () => {
@@ -252,7 +180,6 @@ const Notebook: React.FC = () => {
         content: newNote.content.trim(),
         color: newNote.color,
         pinned: false,
-        archived: false,
         labels: newNote.labels,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -458,7 +385,7 @@ const Notebook: React.FC = () => {
             Your personal notes and ideas • Synced across devices
           </p>
         </div>
-
+        
         {/* Search */}
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -491,8 +418,8 @@ const Notebook: React.FC = () => {
             key={label}
             className={cn(
               "cursor-pointer transition-all border-0",
-              selectedLabelFilter === label
-                ? "ring-2 ring-primary ring-offset-2"
+              selectedLabelFilter === label 
+                ? "ring-2 ring-primary ring-offset-2" 
                 : "",
               getLabelColor(label)
             )}
@@ -529,9 +456,9 @@ const Notebook: React.FC = () => {
             <Button size="sm" className="h-6 px-2" onClick={() => addCustomLabel(newLabelInput)}>
               Add
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+            <Button 
+              variant="ghost" 
+              size="sm" 
               className="h-6 px-1"
               onClick={() => {
                 setShowLabelInput(false);
@@ -571,69 +498,11 @@ const Notebook: React.FC = () => {
               className="border-0 text-lg font-medium bg-transparent focus-visible:ring-0 p-0"
               autoFocus
             />
-
-            {/* Formatting Toolbar */}
-            <div className="flex items-center gap-1 pb-2 border-b">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => insertFormatting('- ')}
-                title="Add bullet point (or press Enter to continue)"
-              >
-                <List className="w-4 h-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => insertFormatting('☐ ')}
-                title="Add checkbox (or press Enter to continue)"
-              >
-                <CheckSquare className="w-4 h-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => insertFormatting('# ')}
-                title="Add heading (or press Enter to continue)"
-              >
-                <Heading2 className="w-4 h-4" />
-              </Button>
-              <div className="w-px h-5 bg-border mx-1" />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => insertFormatting('**')}
-                title="Bold text"
-              >
-                <Bold className="w-4 h-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => insertFormatting('*')}
-                title="Italic text"
-              >
-                <Italic className="w-4 h-4" />
-              </Button>
-            </div>
-
             <Textarea
-              ref={textareaRef}
-              placeholder="Take a note... (use toolbar or press Enter to continue formatting)"
+              placeholder="Take a note..."
               value={newNote.content}
               onChange={(e) => setNewNote(prev => ({ ...prev, content: e.target.value }))}
-              onKeyDown={handleTextareaKeyDown}
-              className="border-0 bg-transparent focus-visible:ring-0 p-0 min-h-[100px] resize-none whitespace-pre-wrap"
+              className="border-0 bg-transparent focus-visible:ring-0 p-0 min-h-[100px] resize-none"
             />
             {/* Labels for new note */}
             <div className="flex flex-wrap gap-1">
@@ -642,8 +511,8 @@ const Notebook: React.FC = () => {
                   key={label}
                   className={cn(
                     "cursor-pointer transition-all text-xs border-0",
-                    newNote.labels.includes(label)
-                      ? "ring-2 ring-primary ring-offset-1"
+                    newNote.labels.includes(label) 
+                      ? "ring-2 ring-primary ring-offset-1" 
                       : "opacity-60",
                     getLabelColor(label)
                   )}
@@ -790,43 +659,7 @@ const Notebook: React.FC = () => {
                 placeholder="Note content..."
                 value={editingNote.content}
                 onChange={(e) => setEditingNote({ ...editingNote, content: e.target.value })}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const textarea = e.currentTarget;
-                    const cursorPos = textarea.selectionStart;
-                    const text = editingNote.content;
-
-                    let lineStart = cursorPos;
-                    while (lineStart > 0 && text[lineStart - 1] !== '\n') {
-                      lineStart--;
-                    }
-
-                    const currentLine = text.substring(lineStart, cursorPos);
-
-                    let formatPrefix = '';
-                    if (currentLine.match(/^- /)) {
-                      formatPrefix = '- ';
-                    } else if (currentLine.match(/^☐ /)) {
-                      formatPrefix = '☐ ';
-                    } else if (currentLine.match(/^#{1,6} /)) {
-                      formatPrefix = currentLine.match(/^(#{1,6} )/)?.[1] || '';
-                    }
-
-                    const before = text.substring(0, cursorPos);
-                    const after = text.substring(cursorPos);
-                    const newContent = before + '\n' + formatPrefix + after;
-
-                    setEditingNote({ ...editingNote, content: newContent });
-
-                    setTimeout(() => {
-                      textarea.focus();
-                      const newCursorPos = cursorPos + 1 + formatPrefix.length;
-                      textarea.setSelectionRange(newCursorPos, newCursorPos);
-                    }, 0);
-                  }
-                }}
-                className="min-h-[200px] resize-none whitespace-pre-wrap"
+                className="min-h-[200px] resize-none"
               />
               {/* Labels in edit dialog */}
               <div className="space-y-2">
@@ -839,8 +672,8 @@ const Notebook: React.FC = () => {
                       key={label}
                       className={cn(
                         "cursor-pointer transition-all text-xs border-0",
-                        editingNote.labels.includes(label)
-                          ? "ring-2 ring-primary ring-offset-1"
+                        editingNote.labels.includes(label) 
+                          ? "ring-2 ring-primary ring-offset-1" 
                           : "opacity-60",
                         getLabelColor(label)
                       )}
@@ -939,7 +772,7 @@ const NoteCard: React.FC<NoteCardProps> = ({
           {note.content}
         </p>
       )}
-
+      
       {/* Labels Display */}
       {note.labels.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-2">
@@ -954,9 +787,9 @@ const NoteCard: React.FC<NoteCardProps> = ({
           ))}
         </div>
       )}
-
+      
       {/* Actions */}
-      <div
+      <div 
         className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity"
         onClick={(e) => e.stopPropagation()}
       >
@@ -987,8 +820,8 @@ const NoteCard: React.FC<NoteCardProps> = ({
                   key={label}
                   className={cn(
                     "cursor-pointer transition-all text-xs border-0",
-                    note.labels.includes(label)
-                      ? "ring-2 ring-primary ring-offset-1"
+                    note.labels.includes(label) 
+                      ? "ring-2 ring-primary ring-offset-1" 
                       : "opacity-60",
                     getLabelColor(label)
                   )}
@@ -1044,3 +877,4 @@ const NoteCard: React.FC<NoteCardProps> = ({
 };
 
 export default Notebook;
+

@@ -279,7 +279,7 @@ const CombinedDashboard: React.FC = () => {
           </motion.p>
           <div className="flex items-center gap-4 mt-4">
             <MotivationalQuote />
-            <Button
+            {/* <Button
               onClick={handleTestNotification}
               disabled={isTestingNotification}
               variant="outline"
@@ -297,7 +297,7 @@ const CombinedDashboard: React.FC = () => {
                   Test Notification
                 </>
               )}
-            </Button>
+            </Button> */}
           </div>
         </div>
       </motion.div>

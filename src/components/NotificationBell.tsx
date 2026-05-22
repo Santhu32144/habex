@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Bell } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Bell, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -29,6 +29,14 @@ export const NotificationBell: React.FC = () => {
   const { getActiveRecurringExpenses, getMonthlyTotal } = useRecurringExpenses();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [dismissedNotifications, setDismissedNotifications] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('dismissedNotifications');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  useEffect(() => {
+    localStorage.setItem('dismissedNotifications', JSON.stringify(Array.from(dismissedNotifications)));
+  }, [dismissedNotifications]);
 
   const notifications = useMemo(() => {
     const alerts: Notification[] = [];
@@ -112,8 +120,17 @@ export const NotificationBell: React.FC = () => {
     return alerts;
   }, [expenses, selectedYear, budgets, getActiveRecurringExpenses, getMonthlyTotal]);
 
-  const warningCount = notifications.filter(n => n.severity === 'warning').length;
-  const hasNotifications = notifications.length > 0;
+  const visibleNotifications = notifications.filter(n => !dismissedNotifications.has(n.id));
+  const warningCount = visibleNotifications.filter(n => n.severity === 'warning').length;
+  const hasNotifications = visibleNotifications.length > 0;
+
+  const dismissNotification = (notificationId: string) => {
+    setDismissedNotifications(prev => new Set(prev).add(notificationId));
+  };
+
+  const clearAllNotifications = () => {
+    setDismissedNotifications(new Set(notifications.map(n => n.id)));
+  };
 
   const handleNotificationClick = (notification: Notification) => {
     setOpen(false);
@@ -157,36 +174,65 @@ export const NotificationBell: React.FC = () => {
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {notifications.length === 0 ? (
+        {visibleNotifications.length === 0 ? (
           <div className="p-4 text-center text-muted-foreground text-sm">
             No notifications
           </div>
         ) : (
-          <div className="max-h-80 overflow-y-auto">
-            {notifications.map((notification) => (
-              <DropdownMenuItem
-                key={notification.id}
-                className={cn(
-                  "flex items-start gap-3 p-3 cursor-pointer",
-                  notification.severity === 'warning' && "bg-destructive/5"
-                )}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                <span className="text-lg flex-shrink-0">{notification.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className={cn(
-                    "text-sm font-medium truncate",
-                    notification.severity === 'warning' && "text-destructive"
-                  )}>
-                    {notification.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {notification.message}
-                  </p>
+          <>
+            <div className="max-h-80 overflow-y-auto">
+              {visibleNotifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={cn(
+                    "flex items-start gap-3 p-3 cursor-pointer hover:bg-muted/50 transition-colors group",
+                    notification.severity === 'warning' && "bg-destructive/5 hover:bg-destructive/10"
+                  )}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <span className="text-lg flex-shrink-0">{notification.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn(
+                      "text-sm font-medium truncate",
+                      notification.severity === 'warning' && "text-destructive"
+                    )}>
+                      {notification.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {notification.message}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dismissNotification(notification.id);
+                    }}
+                    className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded"
+                  >
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </button>
                 </div>
-              </DropdownMenuItem>
-            ))}
-          </div>
+              ))}
+            </div>
+            {visibleNotifications.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="p-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      clearAllNotifications();
+                    }}
+                  >
+                    Clear all notifications
+                  </Button>
+                </div>
+              </>
+            )}
+          </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
