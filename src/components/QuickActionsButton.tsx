@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 export const QuickActionsButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
-  const [expenseForm, setExpenseForm] = useState({ amount: '', category: 'snacks' });
+  const [expenseForm, setExpenseForm] = useState({ amount: '', category: 'snacks', description: '' });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { updateMonth, getYearData } = useExpenses();
@@ -29,6 +29,12 @@ export const QuickActionsButton: React.FC = () => {
   const handleAddExpense = async () => {
     if (!expenseForm.amount || parseFloat(expenseForm.amount) <= 0) {
       toast({ description: 'Please enter a valid amount', variant: 'destructive' });
+      return;
+    }
+
+    // Validate description for self expense and other expenses
+    if ((expenseForm.category === 'selfExpense' || expenseForm.category === 'otherExpenses') && !expenseForm.description.trim()) {
+      toast({ description: 'Please enter a description', variant: 'destructive' });
       return;
     }
 
@@ -46,13 +52,20 @@ export const QuickActionsButton: React.FC = () => {
 
       // Add the expense
       const categoryKey = expenseForm.category as keyof typeof CATEGORIES;
-      updatedData[categoryKey] = [...(updatedData[categoryKey] || []), numAmount];
+
+      if (expenseForm.category === 'selfExpense' || expenseForm.category === 'otherExpenses') {
+        // For self expense and other expenses, add as object with description
+        updatedData[categoryKey] = [...(updatedData[categoryKey] || []), { desc: expenseForm.description, amount: numAmount }];
+      } else {
+        // For other categories, add just the number
+        updatedData[categoryKey] = [...(updatedData[categoryKey] || []), numAmount];
+      }
 
       // Update the month
       await updateMonth(year, month, updatedData);
 
       toast({ description: `Added ₹${expenseForm.amount}!` });
-      setExpenseForm({ amount: '', category: 'snacks' });
+      setExpenseForm({ amount: '', category: 'snacks', description: '' });
       setShowExpenseDialog(false);
       setIsOpen(false);
     } catch (error) {
@@ -130,6 +143,18 @@ export const QuickActionsButton: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
+            {(expenseForm.category === 'selfExpense' || expenseForm.category === 'otherExpenses') && (
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Input
+                  placeholder="Why are you spending this amount?"
+                  value={expenseForm.description}
+                  onChange={(e) => setExpenseForm(p => ({ ...p, description: e.target.value }))}
+                  className="mt-1"
+                  disabled={isLoading}
+                />
+              </div>
+            )}
             <div className="flex gap-2 justify-end pt-4">
               <Button
                 variant="outline"

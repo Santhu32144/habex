@@ -51,22 +51,29 @@ export const GlobalSearch: React.FC = () => {
       }
     });
 
-    // Search expenses by amount or category
+    // Search expenses by amount, category, or description
     Object.entries(expenses[selectedYear] || {}).forEach(([month, monthData]) => {
       if (typeof monthData === 'object') {
         Object.entries(monthData).forEach(([category, data]) => {
           if (Array.isArray(data)) {
             data.forEach((item, index) => {
               const amount = typeof item === 'number' ? item : item.amount;
+              const description = typeof item === 'object' && item.desc ? item.desc : '';
+
               if (
                 amount.toString().includes(query) ||
-                category.toLowerCase().includes(query)
+                category.toLowerCase().includes(query) ||
+                description.toLowerCase().includes(query)
               ) {
+                const subtitle = description
+                  ? `${description} - ₹${amount} (${month} ${selectedYear})`
+                  : `${month} ${selectedYear}`;
+
                 results.push({
                   type: 'expense',
                   id: `${month}-${category}-${index}`,
                   title: `${category}: ₹${amount}`,
-                  subtitle: `${month} ${selectedYear}`,
+                  subtitle: subtitle,
                   action: () => {
                     navigate('/months');
                     setOpen(false);

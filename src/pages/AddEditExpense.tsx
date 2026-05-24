@@ -74,7 +74,7 @@ const AddEditExpense: React.FC = () => {
   const handleSimpleArrayAdd = (category: 'snacks' | 'food' | 'travellingCharge' | 'petrol') => {
     setFormData(prev => ({
       ...prev,
-      [category]: [...prev[category], 0],
+      [category]: [0, ...prev[category]],
     }));
   };
 
@@ -104,7 +104,7 @@ const AddEditExpense: React.FC = () => {
   const handleDetailedAdd = (category: 'otherExpenses' | 'selfExpense') => {
     setFormData(prev => ({
       ...prev,
-      [category]: [...prev[category], { desc: '', amount: 0 }],
+      [category]: [{ desc: '', amount: 0 }, ...prev[category]],
     }));
   };
 
@@ -298,19 +298,25 @@ const AddEditExpense: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div>
-          <h1 className="font-display text-2xl font-bold">
-            {editMonth ? 'Edit Expenses' : 'Add Expenses'}
-          </h1>
-          <p className="text-muted-foreground">
-            {editMonth ? `Editing ${editMonth} ${editYear}` : 'Record your monthly expenses'}
-          </p>
+      {/* Header with Top Save Button */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h1 className="font-display text-2xl font-bold">
+              {editMonth ? 'Edit Expenses' : 'Add Expenses'}
+            </h1>
+            <p className="text-muted-foreground">
+              {editMonth ? `Editing ${editMonth} ${editYear}` : 'Record your monthly expenses'}
+            </p>
+          </div>
         </div>
+        <Button onClick={handleSubmit} className="gap-2 whitespace-nowrap">
+          <Save className="w-4 h-4" />
+          Save
+        </Button>
       </div>
 
       {/* Year and Month Selection */}
