@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Wallet, Users, Receipt, PlusCircle, Pencil, Check, X } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Wallet, Users, Receipt, PlusCircle, Pencil, Check, X, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,10 @@ import { GroupMembersTab } from '@/components/investments/GroupMembersTab';
 import { GroupInvestmentsTab } from '@/components/investments/GroupInvestmentsTab';
 import { GroupExpensesTab } from '@/components/investments/GroupExpensesTab';
 import { GroupActivityLog } from '@/components/investments/GroupActivityLog';
+import { GroupSettlementTab } from '@/components/investments/GroupSettlementTab';
+import { GroupMemberMetrics } from '@/components/investments/GroupMemberMetrics';
+import { GroupBudgetGoals } from '@/components/investments/GroupBudgetGoals';
+import { FinancialReports } from '@/components/investments/FinancialReports';
 import { motion } from 'framer-motion';
 
 const InvestmentGroupDashboard: React.FC = () => {
@@ -55,10 +59,11 @@ const InvestmentGroupDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/investments')}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/investments')}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
         {editingName ? (
           <div className="flex items-center gap-2 flex-1">
             <div className="space-y-1 flex-1">
@@ -81,14 +86,61 @@ const InvestmentGroupDashboard: React.FC = () => {
             )}
           </div>
         )}
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            const csv = [
+              ['Investment Group Report'],
+              [`Group: ${group.name}`],
+              [`Generated: ${new Date().toLocaleDateString()}`],
+              [],
+              ['INVESTMENTS'],
+              ['Member', 'Amount', 'Date', 'Description'],
+              ...investments.map(i => [i.member_name, i.amount.toString(), i.invested_date, i.description || '']),
+              [],
+              ['EXPENSES'],
+              ['Category', 'Amount', 'Spent By', 'Date', 'Description'],
+              ...expenses.map(e => [e.category, e.amount.toString(), e.spent_by, e.expense_date, e.description || '']),
+              [],
+              ['SUMMARY'],
+              ['Total Invested', totalInvested.toString()],
+              ['Total Spent', totalSpent.toString()],
+              ['Balance', balance.toString()],
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${group.name}-report-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+          }}
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Export
+        </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {[
-          { title: 'Total Invested', icon: <TrendingUp className="w-4 h-4 text-green-500" />, value: formatter.format(totalInvested), color: 'text-green-600', sub: `${investments.length} contributions` },
-          { title: 'Total Spent', icon: <TrendingDown className="w-4 h-4 text-red-500" />, value: formatter.format(totalSpent), color: 'text-red-600', sub: `${expenses.length} expenses` },
-          { title: 'Balance', icon: <Wallet className="w-4 h-4 text-primary" />, value: formatter.format(balance), color: balance >= 0 ? 'text-green-600' : 'text-red-600', sub: `${activeMembers.length + 1} members` },
-        ].map((card, i) => (
+      {/* Calculate ROI */}
+      {useMemo(() => {
+        const roi = totalInvested > 0 ? ((balance / totalInvested) * 100).toFixed(2) : '0.00';
+        const efficiency = totalSpent > 0 && totalInvested > 0 ? ((totalSpent / totalInvested) * 100).toFixed(2) : '0.00';
+        return { roi, efficiency };
+      }, [totalInvested, balance, totalSpent])}
+
+      <div className="grid gap-4 md:grid-cols-4">
+        {(() => {
+          const roi = totalInvested > 0 ? ((balance / totalInvested) * 100).toFixed(2) : '0.00';
+          const efficiency = totalSpent > 0 && totalInvested > 0 ? ((totalSpent / totalInvested) * 100).toFixed(2) : '0.00';
+          return [
+            { title: 'Total Invested', icon: <TrendingUp className="w-4 h-4 text-green-500" />, value: formatter.format(totalInvested), color: 'text-green-600', sub: `${investments.length} contributions` },
+            { title: 'Total Spent', icon: <TrendingDown className="w-4 h-4 text-red-500" />, value: formatter.format(totalSpent), color: 'text-red-600', sub: `${expenses.length} expenses` },
+            { title: 'ROI / Return', icon: <TrendingUp className="w-4 h-4 text-blue-500" />, value: `${roi}%`, color: 'text-blue-600', sub: `${formatter.format(balance)} net` },
+            { title: 'Balance', icon: <Wallet className="w-4 h-4 text-primary" />, value: formatter.format(balance), color: balance >= 0 ? 'text-green-600' : 'text-red-600', sub: `${activeMembers.length + 1} members` },
+          ];
+        })().map((card, i) => (
           <motion.div
             key={card.title}
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -117,13 +169,33 @@ const InvestmentGroupDashboard: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="activity" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="activity">Activity</TabsTrigger>
-          <TabsTrigger value="investments">Investments</TabsTrigger>
-          <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="members">Members</TabsTrigger>
+      <Tabs defaultValue="settlement" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-8 overflow-auto text-xs">
+          <TabsTrigger value="settlement" className="text-xs">Settlement</TabsTrigger>
+          <TabsTrigger value="reports" className="text-xs">Reports</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs">Analytics</TabsTrigger>
+          <TabsTrigger value="budget" className="text-xs">Budget</TabsTrigger>
+          <TabsTrigger value="activity" className="text-xs">Activity</TabsTrigger>
+          <TabsTrigger value="investments" className="text-xs">Investments</TabsTrigger>
+          <TabsTrigger value="expenses" className="text-xs">Expenses</TabsTrigger>
+          <TabsTrigger value="members" className="text-xs">Members</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="settlement">
+          <GroupSettlementTab investments={investments} expenses={expenses} members={members} />
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <FinancialReports investments={investments} expenses={expenses} groupName={group?.name || 'Group'} />
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <GroupMemberMetrics investments={investments} expenses={expenses} members={members} />
+        </TabsContent>
+
+        <TabsContent value="budget">
+          <GroupBudgetGoals expenses={expenses} />
+        </TabsContent>
 
         <TabsContent value="activity">
           <GroupActivityLog investments={investments} expenses={expenses} />

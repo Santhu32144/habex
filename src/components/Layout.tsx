@@ -2,12 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  LayoutDashboard, 
+import {
+  LayoutDashboard,
   Calendar,
   Handshake,
-  PlusCircle, 
-  Menu, 
+  PlusCircle,
+  Menu,
   X,
   Search,
   Wallet,
@@ -41,7 +41,10 @@ import { BottomTabBar } from '@/components/BottomTabBar';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
 import { NotificationPrompt } from '@/components/NotificationPrompt';
 import { ThemeQuickSwitch } from '@/components/ThemeQuickSwitch';
-import { QuickAddExpense } from '@/components/QuickAddExpense';
+import { QuickActionsButton } from '@/components/QuickActionsButton';
+import { CommandPalette } from '@/components/CommandPalette';
+import { GlobalSearch } from '@/components/GlobalSearch';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { useSwipe } from '@/hooks/useSwipe';
 import {
   Collapsible,
@@ -621,14 +624,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* Right: Search Icon + Actions */}
             <div className="flex items-center gap-1 sm:gap-2 lg:gap-3">
-              {/* Search icon for expense-related pages */}
-              {(location.pathname === '/expenses' || 
-                location.pathname === '/months' || 
-                location.pathname.startsWith('/add') || 
-                location.pathname.startsWith('/edit') ||
-                location.pathname === '/recurring') && (
-                <SearchIconButton />
-              )}
+              {/* Global Search */}
+              <GlobalSearch />
               <ThemeQuickSwitch />
               <NotificationBell />
               <ProfileDropdown />
@@ -638,6 +635,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Page Content */}
         <div className="p-4 lg:p-8 pb-24 lg:pb-8">
+          {/* Breadcrumbs */}
+          {location.pathname !== '/' && (
+            <Breadcrumbs />
+          )}
+
           <motion.div
             key={location.pathname}
             initial={{ opacity: 0, y: 10 }}
@@ -653,8 +655,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <NotificationPrompt />
       </main>
 
-      {/* Quick Add Expense Floating Button */}
-      <QuickAddExpense />
+      {/* Command Palette */}
+      <CommandPalette />
+
+      {/* Quick Actions Floating Button */}
+      <QuickActionsButton />
     </div>
   );
 };
