@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import dashboardHeroVideo from '@/assets/dashboard-hero-video.mp4.asset.json';
 import MotivationalQuote from '@/components/MotivationalQuote';
-import { Wallet, TrendingUp, Fuel, CheckCircle2, Calendar, BarChart3, Crown, CalendarDays, Bell, Loader2 } from 'lucide-react';
+import { Wallet, TrendingUp, Fuel, CheckCircle2, Calendar, BarChart3, Crown, CalendarDays, Bell, Loader2, DollarSign, Target, Flame } from 'lucide-react';
 import { requestNotificationPermission, sendNotification } from '@/utils/notifications';
 import { useExpenses } from '@/contexts/ExpenseContext';
 import { useHabits } from '@/contexts/HabitContext';
