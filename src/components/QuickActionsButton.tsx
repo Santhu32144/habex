@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useExpenses } from '@/contexts/ExpenseContext';
 import { useToast } from '@/hooks/use-toast';
+import { CATEGORIES } from '@/data/expenseData';
 import {
   Plus,
   DollarSign,
@@ -16,39 +17,49 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const EXPENSE_CATEGORIES = [
-  'Snacks', 'Food', 'Transport', 'Entertainment', 'Utilities', 'Other'
-];
-
 export const QuickActionsButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
-  const [expenseForm, setExpenseForm] = useState({ amount: '', category: 'Snacks' });
+  const [expenseForm, setExpenseForm] = useState({ amount: '', category: 'snacks' });
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { addExpense } = useExpenses();
+  const { updateMonth, getYearData } = useExpenses();
   const { toast } = useToast();
 
   const handleAddExpense = async () => {
-    if (!expenseForm.amount || !expenseForm.category) {
-      toast({ description: 'Please fill in all fields', variant: 'destructive' });
+    if (!expenseForm.amount || parseFloat(expenseForm.amount) <= 0) {
+      toast({ description: 'Please enter a valid amount', variant: 'destructive' });
       return;
     }
 
+    setIsLoading(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
-      await addExpense({
-        category: expenseForm.category,
-        amount: parseFloat(expenseForm.amount),
-        description: '',
-        date: today,
-      });
+      const now = new Date();
+      const month = now.toLocaleString('default', { month: 'long' });
+      const year = now.getFullYear();
+      const numAmount = parseFloat(expenseForm.amount);
 
-      toast({ description: 'Expense added successfully!' });
-      setExpenseForm({ amount: '', category: 'Snacks' });
+      // Get existing month data
+      const yearData = getYearData(year);
+      const existingData = yearData[month] || {};
+      const updatedData = { ...existingData };
+
+      // Add the expense
+      const categoryKey = expenseForm.category as keyof typeof CATEGORIES;
+      updatedData[categoryKey] = [...(updatedData[categoryKey] || []), numAmount];
+
+      // Update the month
+      await updateMonth(year, month, updatedData);
+
+      toast({ description: `Added ₹${expenseForm.amount}!` });
+      setExpenseForm({ amount: '', category: 'snacks' });
       setShowExpenseDialog(false);
       setIsOpen(false);
     } catch (error) {
+      console.error('Error adding expense:', error);
       toast({ description: 'Failed to add expense', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,6 +111,8 @@ export const QuickActionsButton: React.FC = () => {
                 value={expenseForm.amount}
                 onChange={(e) => setExpenseForm(p => ({ ...p, amount: e.target.value }))}
                 className="mt-1"
+                disabled={isLoading}
+                autoFocus
               />
             </div>
             <div>
@@ -109,18 +122,28 @@ export const QuickActionsButton: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {EXPENSE_CATEGORIES.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  {Object.entries(CATEGORIES).map(([key, cat]) => (
+                    <SelectItem key={key} value={key}>
+                      {cat.icon} {cat.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="flex gap-2 justify-end pt-4">
-              <Button variant="outline" onClick={() => setShowExpenseDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowExpenseDialog(false)}
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleAddExpense} className="bg-green-500 hover:bg-green-600">
-                Add Expense
+              <Button
+                onClick={handleAddExpense}
+                className="bg-green-500 hover:bg-green-600"
+                disabled={isLoading || !expenseForm.amount}
+              >
+                {isLoading ? 'Adding...' : 'Add Expense'}
               </Button>
             </div>
           </div>
