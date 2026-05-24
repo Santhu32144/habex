@@ -150,7 +150,7 @@ export const QuickActionsButton: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="fixed bottom-6 right-6 z-40 sm:bottom-8 sm:right-8 flex flex-col items-end gap-3">
+      <div className="fixed bottom-6 right-6 z-50 sm:bottom-8 sm:right-8 flex flex-col items-end gap-3 pointer-events-auto">
       <AnimatePresence>
         {isOpen && (
           <motion.div

@@ -290,20 +290,23 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Button>
 
           {/* Logo */}
-          <div className={cn("p-4 flex items-center gap-3", collapsed && "justify-center")}>
-            <motion.img 
-              src="/habex-logo.png" 
-              alt="Habex" 
+          <div
+            className={cn("p-4 flex items-center gap-3 cursor-pointer", collapsed && "justify-center")}
+            onClick={() => navigate('/')}
+          >
+            <motion.img
+              src="/habex-logo.png"
+              alt="Habex"
               className="w-10 h-10 rounded-xl flex-shrink-0 cursor-pointer"
-              whileHover={{ 
-                scale: 1.1, 
+              whileHover={{
+                scale: 1.1,
                 rotate: [0, -5, 5, 0],
                 transition: { duration: 0.4 }
               }}
               whileTap={{ scale: 0.95 }}
             />
             {!collapsed && (
-              <div className="overflow-hidden">
+              <div className="overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
                 <h1 className="font-display font-bold text-lg text-sidebar-foreground truncate">Habex</h1>
                 <p className="text-xs text-sidebar-foreground/60 truncate">Habits & Expenses</p>
               </div>
@@ -600,7 +603,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 <Menu className="w-5 h-5" />
               </Button>
-              <div className="flex items-center gap-2 sm:gap-3">
+              <div
+                className="flex items-center gap-2 sm:gap-3 cursor-pointer"
+                onClick={() => navigate('/')}
+              >
                 <motion.img
                   src="/habex-logo.png"
                   alt="Habex"
@@ -612,7 +618,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   }}
                   whileTap={{ scale: 0.95 }}
                 />
-                <h1 className="font-display font-bold text-base sm:text-xl text-primary lg:hidden whitespace-nowrap">Habex</h1>
+                <h1 className="font-display font-bold text-base sm:text-xl text-primary lg:hidden whitespace-nowrap hover:opacity-80 transition-opacity">Habex</h1>
                 <div className="hidden lg:flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   <h2 className="font-display font-semibold text-lg tracking-tight">
