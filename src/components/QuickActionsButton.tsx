@@ -150,39 +150,39 @@ export const QuickActionsButton: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="fixed bottom-24 right-4 z-50 sm:bottom-28 sm:right-6 flex flex-col items-center gap-2 pointer-events-auto">
+      <div className="fixed bottom-24 right-4 z-50 sm:bottom-28 sm:right-6 flex flex-col items-end gap-3 pointer-events-auto">
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="flex flex-col gap-4 items-center"
+            className="flex flex-col gap-3 items-end"
           >
             {actions.map((action, index) => {
               const Icon = action.icon;
               return (
                 <motion.div
                   key={action.label}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
                   transition={{
                     delay: index * 0.08,
                     type: 'spring',
                     stiffness: 300,
                     damping: 30,
                   }}
-                  className="flex flex-col items-center gap-2"
+                  className="flex items-center gap-3"
                 >
-                  <span className="text-xs font-medium text-muted-foreground bg-background px-3 py-1 rounded-full whitespace-nowrap shadow-md">
+                  <span className="text-sm font-medium text-muted-foreground bg-background/80 px-3 py-2 rounded-lg whitespace-nowrap shadow-md border border-border/50">
                     {action.label}
                   </span>
                   <button
                     onClick={action.action}
                     className={cn(
-                      'w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl transition-all hover:scale-110 active:scale-95 border border-white/20',
+                      'w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl transition-all hover:scale-110 active:scale-95 border border-white/20 flex-shrink-0',
                       action.color
                     )}
                     title={action.label}
