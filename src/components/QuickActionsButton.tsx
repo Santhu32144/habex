@@ -150,7 +150,7 @@ export const QuickActionsButton: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="fixed bottom-6 right-6 z-50 sm:bottom-8 sm:right-8 flex flex-col items-end gap-3 pointer-events-auto">
+      <div className="fixed bottom-24 right-4 z-50 sm:bottom-28 sm:right-6 flex flex-col items-end gap-3 pointer-events-auto">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -199,11 +199,13 @@ export const QuickActionsButton: React.FC = () => {
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white font-semibold transition-all hover:scale-110',
-          isOpen ? 'bg-destructive hover:bg-destructive/90' : 'bg-primary hover:bg-primary/90'
+          'w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-white font-semibold transition-all hover:scale-110 active:scale-95 border-2 border-white/20',
+          isOpen
+            ? 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-500/50'
+            : 'bg-gradient-to-br from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 shadow-cyan-400/50'
         )}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.15 }}
+        whileTap={{ scale: 0.9 }}
         title={isOpen ? 'Close menu' : 'Quick actions'}
       >
         <AnimatePresence mode="wait">
@@ -215,7 +217,7 @@ export const QuickActionsButton: React.FC = () => {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <X className="w-6 h-6" />
+              <X className="w-7 h-7" />
             </motion.div>
           ) : (
             <motion.div
@@ -225,7 +227,7 @@ export const QuickActionsButton: React.FC = () => {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <Plus className="w-6 h-6" />
+              <Plus className="w-7 h-7" />
             </motion.div>
           )}
         </AnimatePresence>
