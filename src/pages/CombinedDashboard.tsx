@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import dashboardHeroVideo from '@/assets/dashboard-hero-video.mp4.asset.json';
 import MotivationalQuote from '@/components/MotivationalQuote';
-import CurrencyConverter from '@/components/CurrencyConverter';
-import { Wallet, Target, TrendingUp, Fuel, DollarSign, Flame, CheckCircle2, Calendar, BarChart3, Crown, CalendarDays, Bell, Loader2 } from 'lucide-react';
+import { Wallet, TrendingUp, Fuel, CheckCircle2, Calendar, BarChart3, Crown, CalendarDays, Bell, Loader2 } from 'lucide-react';
 import { requestNotificationPermission, sendNotification } from '@/utils/notifications';
 import { useExpenses } from '@/contexts/ExpenseContext';
 import { useHabits } from '@/contexts/HabitContext';
@@ -715,57 +714,6 @@ const CombinedDashboard: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Quick Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2"
-                onClick={() => navigate('/add')}
-              >
-                <DollarSign className="h-5 w-5" />
-                <span className="text-xs">Add Expense</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2"
-                onClick={() => navigate('/habits/add')}
-              >
-                <Target className="h-5 w-5" />
-                <span className="text-xs">Add Habit</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2"
-                onClick={() => navigate('/months')}
-              >
-                <Calendar className="h-5 w-5" />
-                <span className="text-xs">Monthly View</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2"
-                onClick={() => navigate('/habits/challenge')}
-              >
-                <Flame className="h-5 w-5" />
-                <span className="text-xs">21 Day Challenge</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Currency Converter */}
-        <CurrencyConverter />
-      </motion.div>
     </div>
   );
 };
