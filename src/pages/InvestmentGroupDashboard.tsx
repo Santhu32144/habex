@@ -123,17 +123,9 @@ const InvestmentGroupDashboard: React.FC = () => {
         </Button>
       </div>
 
-      {/* Calculate ROI */}
-      {useMemo(() => {
-        const roi = totalInvested > 0 ? ((balance / totalInvested) * 100).toFixed(2) : '0.00';
-        const efficiency = totalSpent > 0 && totalInvested > 0 ? ((totalSpent / totalInvested) * 100).toFixed(2) : '0.00';
-        return { roi, efficiency };
-      }, [totalInvested, balance, totalSpent])}
-
       <div className="grid gap-4 md:grid-cols-4">
         {(() => {
           const roi = totalInvested > 0 ? ((balance / totalInvested) * 100).toFixed(2) : '0.00';
-          const efficiency = totalSpent > 0 && totalInvested > 0 ? ((totalSpent / totalInvested) * 100).toFixed(2) : '0.00';
           return [
             { title: 'Total Invested', icon: <TrendingUp className="w-4 h-4 text-green-500" />, value: formatter.format(totalInvested), color: 'text-green-600', sub: `${investments.length} contributions` },
             { title: 'Total Spent', icon: <TrendingDown className="w-4 h-4 text-red-500" />, value: formatter.format(totalSpent), color: 'text-red-600', sub: `${expenses.length} expenses` },
