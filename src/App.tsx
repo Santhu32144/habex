@@ -10,6 +10,7 @@ import { ExpenseProvider } from "@/contexts/ExpenseContext";
 import { HabitProvider } from "@/contexts/HabitContext";
 import { RecurringExpenseProvider } from "@/contexts/RecurringExpenseContext";
 import { UnallocatedExpenseProvider } from "@/contexts/UnallocatedExpenseContext";
+import { ReminderProvider } from "@/contexts/ReminderContext";
 import { Layout } from "@/components/Layout";
 import { AppWrapper } from "@/components/AppWrapper";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -22,6 +23,7 @@ import HabitsDashboard from "./pages/HabitsDashboard";
 import AddHabit from "./pages/AddHabit";
 import Challenge21Days from "./pages/Challenge21Days";
 import Notebook from "./pages/Notebook";
+import Reminders from "./pages/Reminders";
 import SharedInvestments from "./pages/SharedInvestments";
 import InvestmentGroupDashboard from "./pages/InvestmentGroupDashboard";
 import Settings from "./pages/Settings";
@@ -46,8 +48,9 @@ function App() {
             <ExpenseProvider>
               <RecurringExpenseProvider>
                 <HabitProvider>
-                  <UnallocatedExpenseProvider>
-                    <AppWrapper>
+                  <ReminderProvider>
+                    <UnallocatedExpenseProvider>
+                      <AppWrapper>
                       <Toaster />
                       <Sonner />
                       <Routes>
@@ -109,6 +112,11 @@ function App() {
                         <Layout><Notebook /></Layout>
                       </ProtectedRoute>
                     } />
+                    <Route path="/reminders" element={
+                      <ProtectedRoute>
+                        <Layout><Reminders /></Layout>
+                      </ProtectedRoute>
+                    } />
                     
                     {/* Shared Investments */}
                     <Route path="/investments" element={
@@ -160,7 +168,8 @@ function App() {
                       </Routes>
                     </AppWrapper>
                   </UnallocatedExpenseProvider>
-                </HabitProvider>
+                </ReminderProvider>
+              </HabitProvider>
               </RecurringExpenseProvider>
             </ExpenseProvider>
           </AuthProvider>

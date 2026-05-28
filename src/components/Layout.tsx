@@ -29,7 +29,8 @@ import {
   Zap,
   Gamepad2,
   Play,
-  Shield
+  Shield,
+  Bell
 } from 'lucide-react';
 import { useAdmin } from '@/hooks/useAdmin';
 import { cn } from '@/lib/utils';
@@ -149,6 +150,7 @@ const navGroups: NavGroup[] = [
     icon: User,
     items: [
       { to: '/notebook', icon: BookOpen, label: 'Notebook' },
+      { to: '/reminders', icon: Bell, label: 'Reminders' },
     ],
   },
   {

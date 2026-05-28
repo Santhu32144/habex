@@ -16,6 +16,7 @@ import StreakLeaderboard from '@/components/StreakLeaderboard';
 import HabitBadges from '@/components/HabitBadges';
 import HabitCalendarHeatmap from '@/components/HabitCalendarHeatmap';
 import { DashboardHabitTracker } from '@/components/DashboardHabitTracker';
+import { RemindersWidget } from '@/components/RemindersWidget';
 import { 
   Heart, Dumbbell, Brain, Coffee, Book, Music, Bike, Moon, Sun, Droplets,
   Utensils, Pill, Cigarette, Wine, Timer, Pencil, Code, Gamepad2, Camera, Palette,
@@ -303,6 +304,9 @@ const CombinedDashboard: React.FC = () => {
 
       {/* Quick Habit Tracker */}
       <DashboardHabitTracker />
+
+      {/* Reminders Widget */}
+      <RemindersWidget />
 
       {/* Two-column layout for Expenses and Habits */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
