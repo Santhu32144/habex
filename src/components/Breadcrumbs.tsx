@@ -36,7 +36,7 @@ export const Breadcrumbs: React.FC = () => {
 
     // For dynamic routes like /investments/:groupId
     if (pathname.includes('/investments/') && pathname !== '/investments') {
-      currentLabel = 'Investment Details';
+      currentLabel = pathname.startsWith('/investments/cars/') ? 'Car' : 'Investment Details';
     }
 
     const breadcrumbs: Breadcrumb[] = [

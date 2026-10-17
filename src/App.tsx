@@ -26,6 +26,7 @@ import Notebook from "./pages/Notebook";
 import Reminders from "./pages/Reminders";
 import SharedInvestments from "./pages/SharedInvestments";
 import InvestmentGroupDashboard from "./pages/InvestmentGroupDashboard";
+import CarDashboard from "./pages/CarDashboard";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -122,6 +123,11 @@ function App() {
                     <Route path="/investments" element={
                       <ProtectedRoute>
                         <Layout><SharedInvestments /></Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/investments/cars/:carId" element={
+                      <ProtectedRoute>
+                        <Layout><CarDashboard /></Layout>
                       </ProtectedRoute>
                     } />
                     <Route path="/investments/:groupId" element={
